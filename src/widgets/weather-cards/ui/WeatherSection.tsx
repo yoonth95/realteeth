@@ -1,11 +1,13 @@
-import { CurrentWeatherCard } from './CurrentWeatherCard'
-// import { HourlyForecastCard } from './HourlyForecastCard'
+import { CurrentWeatherCard } from './current-weather-card'
+import { HourlyForecastCard } from './hourly-forecast-card'
+// import { WeatherSkeleton } from './WeatherSkeleton'
 
 export function WeatherSection() {
   return (
-    <div className="flex flex-col gap-6">
+    <>
+      {/* <WeatherSkeleton /> */}
       <CurrentWeatherCard />
-      {/* <HourlyForecastCard /> */}
-    </div>
+      <HourlyForecastCard />
+    </>
   )
 }

@@ -22,12 +22,10 @@ export function BookmarkCardList({ bookmarkList }: Props) {
     )
   }
   return (
-    <div>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
-        {bookmarkList.map((bookmark) => (
-          <BookmarkCard key={bookmark.id} bookmark={bookmark} />
-        ))}
-      </div>
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
+      {bookmarkList.map((bookmark) => (
+        <BookmarkCard key={bookmark.id} bookmark={bookmark} />
+      ))}
     </div>
   )
 }

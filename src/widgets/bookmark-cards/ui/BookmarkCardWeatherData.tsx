@@ -12,8 +12,9 @@ export function BookmarkCardWeatherData({ bookmark }: Props) {
           {bookmark.current.temp}°
         </span>
         <span className="text-muted-foreground text-xs">
-          최저 <b className="text-blue-600">{bookmark.today.temp_min}°</b> /
-          최고 <b className="text-red-600">{bookmark.today.temp_max}°</b>
+          최저 <b className="text-highlight-blue">{bookmark.today.temp_min}°</b>{' '}
+          / 최고{' '}
+          <b className="text-highlight-red">{bookmark.today.temp_max}°</b>
         </span>
         <span className="text-muted-foreground mt-0.5 text-xs">
           {bookmark.current.description}

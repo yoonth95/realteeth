@@ -19,8 +19,8 @@ export function WeatherDisplay({
           {description}
         </span>
         <span className="text-muted-foreground mt-0.5 text-xs">
-          최저 <b className="text-blue-600">{tempMin}</b> / 최고{' '}
-          <b className="text-red-600">{tempMax}</b>
+          최저 <b className="text-highlight-blue">{tempMin}</b> / 최고{' '}
+          <b className="text-highlight-red">{tempMax}</b>
         </span>
       </div>
       <div className="bg-secondary/50 flex h-20 w-20 items-center justify-center rounded-2xl">

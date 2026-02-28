@@ -5,25 +5,31 @@ export interface HighlightSegment {
   highlighted: boolean
 }
 
+export interface District {
+  address: string
+  nx: number
+  ny: number
+}
+
 /**
  * korea_districts 배열에서 검색어에 매칭되는 주소를 최대 maxResults개 반환
  * disassemble을 사용해 자모 단위로 매칭하여 초성/불완전 음절도 지원
  */
 export function searchDistricts(
   query: string,
-  districts: string[],
+  districts: District[],
   maxResults: number = 10,
-): string[] {
+): District[] {
   const trimmed = query.trim()
   if (!trimmed) return []
 
   const disassembledQuery = disassemble(trimmed)
-  const results: string[] = []
+  const results: District[] = []
 
   for (const district of districts) {
     if (results.length >= maxResults) break
 
-    const disassembledDistrict = disassemble(district)
+    const disassembledDistrict = disassemble(district.address)
     if (disassembledDistrict.includes(disassembledQuery)) {
       results.push(district)
     }

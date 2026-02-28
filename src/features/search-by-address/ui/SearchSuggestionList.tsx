@@ -1,13 +1,14 @@
 import { getHighlightedSegments } from '../lib/searchAddress'
+import type { District } from '../lib/searchAddress'
 import { HighlightedText } from './HighlightedText'
 import { MapPin } from 'lucide-react'
 
 interface SearchSuggestionListProps {
-  results: string[]
+  results: District[]
   query: string
   focusedIndex: number
   listRef: React.RefObject<HTMLUListElement | null>
-  onSelect: (address: string) => void
+  onSelect: (district: District) => void
   onHover: (index: number) => void
 }
 
@@ -35,17 +36,17 @@ export function SearchSuggestionList({
       ref={listRef}
       className="bg-popover border-border/50 absolute z-50 mt-1 w-full overflow-hidden rounded-xl border shadow-lg"
     >
-      {results.map((address, index) => {
-        const segments = getHighlightedSegments(address, query)
+      {results.map((district, index) => {
+        const segments = getHighlightedSegments(district.address, query)
         return (
-          <li key={address}>
+          <li key={district.address}>
             <button
               type="button"
               className={`flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm transition-colors ${
                 index === focusedIndex ? 'bg-accent' : 'hover:bg-accent'
               }`}
               onMouseDown={(e) => e.preventDefault()}
-              onClick={() => onSelect(address)}
+              onClick={() => onSelect(district)}
               onMouseEnter={() => onHover(index)}
             >
               <MapPin className="text-muted-foreground h-4 w-4 shrink-0" />

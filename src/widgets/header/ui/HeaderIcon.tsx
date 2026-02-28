@@ -1,10 +1,16 @@
+import { useNavigate } from 'react-router-dom'
 import { CloudSun } from 'lucide-react'
 
 export function HeaderIcon() {
+  const navigate = useNavigate()
+
   return (
-    <div className="flex items-center gap-2 pr-3 text-xl font-bold tracking-tight">
+    <div
+      onClick={() => navigate('/')}
+      className="flex cursor-pointer items-center gap-2 pr-3 text-xl font-bold tracking-tight"
+    >
       <CloudSun className="text-primary h-6 w-6" />
-      <span className="hidden sm:inline-block">WeatherNow</span>
+      <span className="hidden sm:inline-block">Weather App</span>
     </div>
   )
 }

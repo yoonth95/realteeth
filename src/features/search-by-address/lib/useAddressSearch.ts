@@ -1,15 +1,18 @@
 import { useRef, useState, useMemo, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import koreaDistricts from '@/shared/assets/data/korea_districts.json'
-import { searchDistricts } from '../lib/searchAddress'
-import type { District } from '../lib/searchAddress'
+import { searchDistricts, type District } from '../lib/searchAddress'
 
 /**
  * 주소 검색 상태 및 키보드 네비게이션 로직 관리
  */
 export function useAddressSearch() {
+  const navigate = useNavigate()
+
   const [search, setSearch] = useState('')
   const [isOpen, setIsOpen] = useState(false)
   const [focusedIndex, setFocusedIndex] = useState(-1)
+
   const containerRef = useRef<HTMLDivElement>(null)
   const listRef = useRef<HTMLUListElement>(null)
 
@@ -18,36 +21,84 @@ export function useAddressSearch() {
     [search],
   )
 
-  const handleSelect = useCallback((district: District) => {
-    setSearch(district.address)
+  const closeSearch = useCallback(() => {
     setIsOpen(false)
     setFocusedIndex(-1)
   }, [])
+
+  const handleSelect = useCallback(
+    (district: District) => {
+      setSearch(district.address)
+      closeSearch()
+      navigate(`/?q=${encodeURIComponent(district.address)}`)
+    },
+    [navigate, closeSearch],
+  )
 
   const handleClear = useCallback(() => {
     setSearch('')
-    setIsOpen(false)
-    setFocusedIndex(-1)
-  }, [])
+    closeSearch()
+  }, [closeSearch])
 
-  const handleChange = useCallback((value: string) => {
-    setSearch(value)
-    setIsOpen(true)
-    setFocusedIndex(-1)
-  }, [])
+  const handleChange = useCallback(
+    (value: string) => {
+      setSearch(value)
+      if (value.trim()) {
+        setIsOpen(true)
+        setFocusedIndex(0)
+        if (listRef.current) listRef.current.scrollTop = 0
+      } else {
+        closeSearch()
+      }
+    },
+    [closeSearch],
+  )
 
   const handleFocus = useCallback(() => {
-    if (search.trim()) setIsOpen(true)
+    if (search.trim()) {
+      setIsOpen(true)
+      setFocusedIndex(0)
+      if (listRef.current) listRef.current.scrollTop = 0
+    }
   }, [search])
 
-  const handleBlur = useCallback((e: React.FocusEvent) => {
-    if (containerRef.current?.contains(e.relatedTarget as Node)) return
-    setIsOpen(false)
-    setFocusedIndex(-1)
-  }, [])
+  const handleBlur = useCallback(
+    (e: React.FocusEvent) => {
+      if (containerRef.current?.contains(e.relatedTarget as Node)) return
+      closeSearch()
+    },
+    [closeSearch],
+  )
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
+      // 엔터 키 처리
+      if (e.key === 'Enter') {
+        const query = search.trim()
+        if (
+          isOpen &&
+          results.length > 0 &&
+          focusedIndex >= 0 &&
+          focusedIndex < results.length
+        ) {
+          e.preventDefault()
+          handleSelect(results[focusedIndex])
+          return
+        } else if (query) {
+          // 직접 입력한 검색어로 검색
+          e.preventDefault()
+          closeSearch()
+          navigate(`/?q=${encodeURIComponent(query)}`)
+          return
+        } else {
+          // 아무 값이 없을 때 엔터를 누르면 쿼리스트링 초기화
+          e.preventDefault()
+          closeSearch()
+          navigate(`/`)
+          return
+        }
+      }
+
       if (!isOpen || results.length === 0) return
 
       switch (e.key) {
@@ -71,21 +122,21 @@ export function useAddressSearch() {
           buttons?.[prevIndex]?.scrollIntoView({ block: 'nearest' })
           break
         }
-        case 'Enter': {
-          if (focusedIndex >= 0 && focusedIndex < results.length) {
-            e.preventDefault()
-            handleSelect(results[focusedIndex])
-          }
-          break
-        }
         case 'Escape': {
-          setIsOpen(false)
-          setFocusedIndex(-1)
+          closeSearch()
           break
         }
       }
     },
-    [isOpen, results, focusedIndex, handleSelect],
+    [
+      isOpen,
+      results,
+      focusedIndex,
+      search,
+      handleSelect,
+      navigate,
+      closeSearch,
+    ],
   )
 
   return {

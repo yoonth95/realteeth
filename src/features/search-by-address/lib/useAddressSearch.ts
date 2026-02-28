@@ -1,6 +1,7 @@
 import { useRef, useState, useMemo, useCallback } from 'react'
 import koreaDistricts from '@/shared/assets/data/korea_districts.json'
 import { searchDistricts } from '../lib/searchAddress'
+import type { District } from '../lib/searchAddress'
 
 /**
  * 주소 검색 상태 및 키보드 네비게이션 로직 관리
@@ -13,12 +14,12 @@ export function useAddressSearch() {
   const listRef = useRef<HTMLUListElement>(null)
 
   const results = useMemo(
-    () => searchDistricts(search, koreaDistricts),
+    () => searchDistricts(search, koreaDistricts as District[]),
     [search],
   )
 
-  const handleSelect = useCallback((address: string) => {
-    setSearch(address)
+  const handleSelect = useCallback((district: District) => {
+    setSearch(district.address)
     setIsOpen(false)
     setFocusedIndex(-1)
   }, [])

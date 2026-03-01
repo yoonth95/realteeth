@@ -9,9 +9,11 @@ import {
 } from '@/shared/ui/card'
 import { useIsMobile } from '@/shared/hooks/use-is-mobile'
 
-import { weatherData } from './constants'
-import { HourlyChart } from './HourlyChart'
+import { getKmaWeatherIcon } from '@/entities/weather/lib/kma-weather-mapper'
+import { HourlyChart, type HourlyChartDataItem } from './HourlyChart'
 import { ScrollNavButtons } from './ScrollNavButtons'
+import { useHourlyForecastQuery } from '@/widgets/weather-cards/api/queries'
+import { HourlyWeatherSkeleton, ErrorStateCard } from '../WeatherSkeleton'
 
 export function HourlyForecastCard() {
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -19,11 +21,45 @@ export function HourlyForecastCard() {
   const endSentinelRef = useRef<HTMLDivElement>(null)
 
   const { isMobile } = useIsMobile()
-  const chartMinWidth = weatherData.length * 55
+  const { data, isLoading, isError } = useHourlyForecastQuery()
+
+  if (isLoading) return <HourlyWeatherSkeleton />
+  if (isError || !data) return <ErrorStateCard />
+
+  // Map API hourly data to Chart data source
+  const chartData: HourlyChartDataItem[] = data.hourlyData.map((d) => {
+    // d.time: "1500"
+    const hour = parseInt(d.time.substring(0, 2), 10)
+    const ampm = hour < 12 ? '오전' : '오후'
+    const displayHour = hour % 12 === 0 ? 12 : hour % 12
+    const timeStr = `${ampm} ${displayHour}시`
+
+    const isDay = hour >= 6 && hour < 18
+    const { description } = getKmaWeatherIcon(d.sky, d.pty, isDay)
+
+    let condition = 'cloud'
+    if (description.includes('비') || description.includes('눈')) {
+      condition = 'rain'
+    } else if (description.includes('맑음')) {
+      condition = isDay ? 'sun' : 'moon'
+    } else {
+      condition = 'cloud'
+    }
+
+    return {
+      time: timeStr,
+      temp: parseInt(d.temp, 10),
+      pop: d.pop,
+      isDay,
+      condition,
+    }
+  })
+
+  const chartMinWidth = chartData.length * 55
 
   return (
-    <article>
-      <Card className="bg-card overflow-hidden border-0 shadow-lg">
+    <article className="w-full">
+      <Card className="bg-card mt-6 w-full overflow-hidden border-0 shadow-lg lg:mt-0">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg">시간대별 날씨</CardTitle>
           <CardDescription className="text-muted-foreground">
@@ -44,7 +80,7 @@ export function HourlyForecastCard() {
             className="flex w-full overflow-x-auto overflow-y-hidden scroll-smooth px-6 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             <div ref={startSentinelRef} className="w-px shrink-0" />
-            <HourlyChart chartMinWidth={chartMinWidth} />
+            <HourlyChart chartMinWidth={chartMinWidth} data={chartData} />
             <div ref={endSentinelRef} className="w-px shrink-0" />
           </div>
         </CardContent>

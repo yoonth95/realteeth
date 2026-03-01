@@ -1,15 +1,24 @@
 import { Cloud, CloudRain, Sun, Moon } from 'lucide-react'
 
 import type { ChartTickProps, ChartDotProps } from './types'
-import { weatherData } from './constants'
+import type { HourlyChartDataItem } from './HourlyChart'
+
+interface CustomChartTickProps extends ChartTickProps {
+  data: HourlyChartDataItem[]
+}
 
 // 시간, 아이콘, 온도 표시
-export const ChartTopTick = ({ x = 0, y = 0, payload }: ChartTickProps) => {
-  if (!payload) return null
+export const ChartTopTick = ({
+  x = 0,
+  y = 0,
+  payload,
+  data,
+}: CustomChartTickProps) => {
+  if (!payload || !data) return null
 
-  const data = weatherData[payload.index]
+  const itemData = data[payload.index]
   const renderIcon = () => {
-    switch (data.condition) {
+    switch (itemData.condition) {
       case 'sun':
         return <Sun size={18} color="#eab308" />
       case 'moon':
@@ -31,7 +40,7 @@ export const ChartTopTick = ({ x = 0, y = 0, payload }: ChartTickProps) => {
         fontSize={11}
         className="font-medium"
       >
-        {data.time}
+        {itemData.time}
       </text>
       <foreignObject x={-9} y={-45} width={18} height={18}>
         {renderIcon()}
@@ -44,17 +53,22 @@ export const ChartTopTick = ({ x = 0, y = 0, payload }: ChartTickProps) => {
         fontSize={14}
         fontWeight="bold"
       >
-        {data.temp}°
+        {itemData.temp}°
       </text>
     </g>
   )
 }
 
 // 강수확률 표시
-export const ChartBottomTick = ({ x = 0, y = 0, payload }: ChartTickProps) => {
-  if (!payload) return null
+export const ChartBottomTick = ({
+  x = 0,
+  y = 0,
+  payload,
+  data,
+}: CustomChartTickProps) => {
+  if (!payload || !data) return null
 
-  const data = weatherData[payload.index]
+  const itemData = data[payload.index]
   return (
     <g transform={`translate(${x},${y})`}>
       <text
@@ -64,7 +78,7 @@ export const ChartBottomTick = ({ x = 0, y = 0, payload }: ChartTickProps) => {
         fill="var(--color-muted-foreground)"
         fontSize={11}
       >
-        💧 {data.pop}%
+        💧 {itemData.pop}%
       </text>
     </g>
   )

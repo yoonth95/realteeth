@@ -1,40 +1,19 @@
-import { useState, useCallback } from 'react'
+import { useCallback } from 'react'
 import { latLonToGrid } from '@/shared/lib/weather-grid-converter'
-
-interface GeolocationState {
-  coordinates: {
-    lat: number
-    lng: number
-  } | null
-  grid: {
-    nx: number
-    ny: number
-  } | null
-  error: string | null
-  isLoading: boolean
-  isResolved: boolean
-  prompted: boolean // 사용자에게 '허용' 대기를 탔는지 여부
-}
+import { useLocationStore } from '@/entities/location/model/store'
 
 export function useGeolocation() {
-  const [state, setState] = useState<GeolocationState>({
-    coordinates: { lat: 37.5425, lng: 127.0521 }, // 기본값 (성동구)
-    grid: { nx: 61, ny: 127 }, // 기본값 (성동구)
-    error: null,
-    isLoading: false,
-    isResolved: false,
-    prompted: false,
-  })
+  const store = useLocationStore()
+  const setLocationData = store.setLocationData
 
   const requestLocation = useCallback(() => {
     if (!navigator.geolocation) {
-      setState((prev) => ({
-        ...prev,
+      setLocationData({
         coordinates: { lat: 37.5425, lng: 127.0521 },
         grid: { nx: 61, ny: 127 },
         error: '사용 중인 웹 브라우저가 위치 정보를 지원하지 않습니다.',
         isResolved: true,
-      }))
+      })
       return
     }
 
@@ -45,14 +24,13 @@ export function useGeolocation() {
           const lng = position.coords.longitude
           const { nx, ny } = latLonToGrid(lat, lng)
 
-          setState((prev) => ({
-            ...prev,
+          setLocationData({
             coordinates: { lat, lng },
             grid: { nx, ny },
             error: null,
             isLoading: false,
             isResolved: true,
-          }))
+          })
         },
         (error) => {
           let errorMessage =
@@ -70,70 +48,65 @@ export function useGeolocation() {
           }
 
           console.warn(
-            `[Geolocation Error] ${errorMessage} - 기본 위치(성동구)를 반환합니다.`,
+            `[Geolocation Error] ${errorMessage} - 기본 위치(성동구)를 반환`,
           )
 
-          setState((prev) => ({
-            ...prev,
+          setLocationData({
             coordinates: { lat: 37.5425, lng: 127.0521 },
             grid: { nx: 61, ny: 127 },
             error: errorMessage,
             isLoading: false,
             isResolved: true,
-          }))
+          })
         },
         { enableHighAccuracy: true, maximumAge: 0 },
       )
     }
 
-    // 만약 브라우저가 Permissions API를 지원한다면 권한 상태를 먼저 확인합니다.
+    // 만약 브라우저가 Permissions API를 지원한다면 권한 상태를 먼저 확인
     if (navigator.permissions && navigator.permissions.query) {
       navigator.permissions
         .query({ name: 'geolocation' })
         .then((result) => {
-          // 'prompt' 상태일 때만 실제 사용자 대기 시간이 발생하므로 로딩 상태로 변경합니다.
+          // 'prompt' 상태일 때만 실제 사용자 대기 시간이 발생하므로 로딩 상태로 변경
           if (result.state === 'prompt') {
-            setState((prev) => ({
-              ...prev,
+            setLocationData({
               isLoading: true,
               error: null,
               isResolved: false,
               prompted: true,
-            }))
+            })
           } else {
-            // 이미 'granted' 거나 'denied' 인 경우 로딩 없이 진행합니다.
-            setState((prev) => ({
-              ...prev,
+            // 이미 'granted' 거나 'denied' 인 경우 로딩 없이 진행
+            setLocationData({
               isLoading: false,
               error: null,
               isResolved: false,
               prompted: false,
-            }))
+            })
           }
           executeLocationRequest()
         })
         .catch(() => {
-          setState((prev) => ({
-            ...prev,
+          setLocationData({
             isLoading: true,
             error: null,
             isResolved: false,
             prompted: false,
-          }))
+          })
           executeLocationRequest()
         })
     } else {
       // Permissions API를 지원하지 않는 브라우저 바로 로딩 처리 후 진행
-      setState((prev) => ({
-        ...prev,
+      setLocationData({
         isLoading: true,
         error: null,
         isResolved: false,
         prompted: false,
-      }))
+      })
       executeLocationRequest()
     }
-  }, [])
+  }, [setLocationData])
 
-  return { ...state, requestLocation }
+  return { ...store, requestLocation }
 }

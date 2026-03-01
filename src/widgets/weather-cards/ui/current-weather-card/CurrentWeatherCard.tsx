@@ -9,17 +9,19 @@ import { useWeatherQueries, weatherQueryKeys } from '@/entities/weather'
 import { LocationHeader } from './LocationHeader'
 import { WeatherDisplay } from './WeatherDisplay'
 import { WeatherDetailStats } from './WeatherDetailStats'
-import { useBookmarkStore } from '@/entities/bookmark'
+import { useBookmarkStore, type Bookmark } from '@/entities/bookmark'
 
-export function CurrentWeatherCard() {
+export function CurrentWeatherCard({ bookmark }: { bookmark?: Bookmark }) {
   const {
-    grid,
+    grid: locationGrid,
     requestLocation,
     isLoading: isLocationLoading,
   } = useGeolocation()
   const queryClient = useQueryClient()
 
   const { bookmarks, addBookmark, removeBookmark } = useBookmarkStore()
+
+  const grid = bookmark ? { nx: bookmark.nx, ny: bookmark.ny } : locationGrid
 
   const { currentQuery, forecastQuery } = useWeatherQueries(grid?.nx, grid?.ny)
 
@@ -38,6 +40,7 @@ export function CurrentWeatherCard() {
   } = forecastQuery
 
   const handleRefreshLocation = async () => {
+    if (bookmark) return
     // 위치 정보 재요청 (nx, ny 값 갱신)
     requestLocation()
 
@@ -66,9 +69,13 @@ export function CurrentWeatherCard() {
     weekday: 'short',
   }).format(new Date())
 
-  const locationName = grid
-    ? getAddressByNxNy(grid.nx, grid.ny) || '알 수 없는 위치'
-    : '알 수 없는 위치'
+  const locationName = bookmark
+    ? bookmark.name
+    : grid
+      ? getAddressByNxNy(grid.nx, grid.ny) || '알 수 없는 위치'
+      : '알 수 없는 위치'
+
+  const aliasName = bookmark ? bookmark.nickname : undefined
 
   // 현재 위치에 대한 즐겨찾기 여부 확인
   const bookmarkId = grid ? `${grid.nx}-${grid.ny}` : ''
@@ -115,11 +122,12 @@ export function CurrentWeatherCard() {
       <Card className="bg-card w-full overflow-hidden border-0 shadow-lg">
         <LocationHeader
           location={locationName}
+          alias={aliasName}
           currentDate={currentDate}
           isBookmark={isBookmarked}
           isFull={isBookmarkFull}
           onToggleFavorite={handleToggleFavorite}
-          onRefreshLocation={handleRefreshLocation}
+          onRefreshLocation={bookmark ? undefined : handleRefreshLocation}
           isRefreshing={
             isLocationLoading || isCurrentFetching || isHourlyFetching
           }

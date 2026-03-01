@@ -6,6 +6,7 @@ import type { LocationHeaderProps } from './types'
 
 export function LocationHeader({
   location,
+  alias,
   currentDate,
   isBookmark,
   isFull,
@@ -18,19 +19,28 @@ export function LocationHeader({
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center gap-1">
-            <span className="font-bold">{location}</span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-5 w-5"
-              onClick={onRefreshLocation}
-              disabled={isRefreshing}
-              aria-label="현재 위치 및 날씨 새로고침"
-            >
-              <Crosshair
-                className={`h-3.5 w-3.5 ${isRefreshing ? 'text-muted-foreground animate-spin' : ''}`}
-              />
-            </Button>
+            <div className="flex flex-col items-start sm:flex-row sm:items-center sm:gap-2">
+              <span className="font-bold">{alias || location}</span>
+              {alias && alias !== location && (
+                <span className="text-muted-foreground text-sm font-normal">
+                  {location}
+                </span>
+              )}
+            </div>
+            {onRefreshLocation && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-5 w-5"
+                onClick={onRefreshLocation}
+                disabled={isRefreshing}
+                aria-label="현재 위치 및 날씨 새로고침"
+              >
+                <Crosshair
+                  className={`h-3.5 w-3.5 ${isRefreshing ? 'text-muted-foreground animate-spin' : ''}`}
+                />
+              </Button>
+            )}
           </div>
           <span className="text-muted-foreground text-xs font-medium">
             {currentDate}

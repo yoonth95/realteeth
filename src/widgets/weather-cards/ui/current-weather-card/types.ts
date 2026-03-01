@@ -9,6 +9,7 @@ export interface CurrentWeatherCardProps {
 
 export interface LocationHeaderProps {
   location: string
+  alias?: string
   currentDate: string
   isBookmark?: boolean
   isFull?: boolean

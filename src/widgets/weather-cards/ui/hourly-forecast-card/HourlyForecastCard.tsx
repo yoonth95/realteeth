@@ -15,14 +15,16 @@ import { ScrollNavButtons } from './ScrollNavButtons'
 import { useWeatherQueries } from '@/entities/weather'
 import { useLocationStore } from '@/entities/location/model/store'
 import { HourlyWeatherSkeleton, ErrorStateCard } from '../WeatherSkeleton'
+import type { Bookmark } from '@/entities/bookmark'
 
-export function HourlyForecastCard() {
+export function HourlyForecastCard({ bookmark }: { bookmark?: Bookmark }) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const startSentinelRef = useRef<HTMLDivElement>(null)
   const endSentinelRef = useRef<HTMLDivElement>(null)
 
   const { isMobile } = useIsMobile()
-  const { grid } = useLocationStore()
+  const { grid: locationGrid } = useLocationStore()
+  const grid = bookmark ? { nx: bookmark.nx, ny: bookmark.ny } : locationGrid
   const { forecastQuery } = useWeatherQueries(grid?.nx, grid?.ny)
   const { data, isLoading, isError } = forecastQuery
 

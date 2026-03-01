@@ -1,13 +1,13 @@
 import { CurrentWeatherCard } from './current-weather-card'
 import { HourlyForecastCard } from './hourly-forecast-card'
-// import { WeatherSkeleton } from './WeatherSkeleton'
+import type { Bookmark } from '@/entities/bookmark'
 
-export function WeatherSection() {
+export function WeatherSection({ bookmark }: { bookmark?: Bookmark }) {
   return (
     <>
       {/* <WeatherSkeleton /> */}
-      <CurrentWeatherCard />
-      <HourlyForecastCard />
+      <CurrentWeatherCard bookmark={bookmark} />
+      <HourlyForecastCard bookmark={bookmark} />
     </>
   )
 }

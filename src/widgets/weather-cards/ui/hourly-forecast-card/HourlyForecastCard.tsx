@@ -13,9 +13,9 @@ import { getKmaWeatherIcon } from '@/entities/weather/lib/kma-weather-mapper'
 import { HourlyChart, type HourlyChartDataItem } from './HourlyChart'
 import { ScrollNavButtons } from './ScrollNavButtons'
 import { useWeatherQueries } from '@/entities/weather'
-import { useLocationStore } from '@/entities/location/model/store'
 import { HourlyWeatherSkeleton, ErrorStateCard } from '../WeatherSkeleton'
 import type { Bookmark } from '@/entities/bookmark'
+import { useWeatherLocation } from '@/widgets/weather-cards/lib/useWeatherLocation'
 
 export function HourlyForecastCard({ bookmark }: { bookmark?: Bookmark }) {
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -23,8 +23,7 @@ export function HourlyForecastCard({ bookmark }: { bookmark?: Bookmark }) {
   const endSentinelRef = useRef<HTMLDivElement>(null)
 
   const { isMobile } = useIsMobile()
-  const { grid: locationGrid } = useLocationStore()
-  const grid = bookmark ? { nx: bookmark.nx, ny: bookmark.ny } : locationGrid
+  const { grid } = useWeatherLocation(bookmark)
   const { forecastQuery } = useWeatherQueries(grid?.nx, grid?.ny)
   const { data, isLoading, isError } = forecastQuery
 

@@ -1,9 +1,9 @@
 import { BookmarkCard } from './BookmarkCard'
-import type { BookmarkLocation } from '@/entities/weather'
+import type { Bookmark } from '@/entities/bookmark'
 import { Star } from 'lucide-react'
 
 interface Props {
-  bookmarkList: BookmarkLocation[]
+  bookmarkList: Bookmark[]
 }
 export function BookmarkCardList({ bookmarkList }: Props) {
   if (!bookmarkList.length) {

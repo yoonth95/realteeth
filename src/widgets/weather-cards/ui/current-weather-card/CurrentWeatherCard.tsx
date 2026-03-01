@@ -4,22 +4,14 @@ import { CurrentWeatherSkeleton, ErrorStateCard } from '../WeatherSkeleton'
 import { useGeolocation } from '@/features/geolocation'
 import { getAddressByNxNy } from '@/entities/weather/lib/address-utils'
 import { getKmaWeatherIcon } from '@/entities/weather/lib/kma-weather-mapper'
-import {
-  useCurrentWeatherQuery,
-  useHourlyForecastQuery,
-} from '@/widgets/weather-cards/api/queries'
+import { useWeatherQueries, weatherQueryKeys } from '@/entities/weather'
 
-import type { CurrentWeatherCardProps } from './types'
 import { LocationHeader } from './LocationHeader'
 import { WeatherDisplay } from './WeatherDisplay'
 import { WeatherDetailStats } from './WeatherDetailStats'
+import { useBookmarkStore } from '@/entities/bookmark'
 
-export function CurrentWeatherCard({
-  // data,
-  isBookmark,
-  isFull,
-  onToggleFavorite,
-}: CurrentWeatherCardProps) {
+export function CurrentWeatherCard() {
   const {
     grid,
     requestLocation,
@@ -27,26 +19,37 @@ export function CurrentWeatherCard({
   } = useGeolocation()
   const queryClient = useQueryClient()
 
+  const { bookmarks, addBookmark, removeBookmark } = useBookmarkStore()
+
+  const { currentQuery, forecastQuery } = useWeatherQueries(grid?.nx, grid?.ny)
+
   const {
     data: currentData,
     isLoading: isCurrentLoading,
     isFetching: isCurrentFetching,
     isError: isCurrentError,
-  } = useCurrentWeatherQuery()
+  } = currentQuery
+
   const {
     data: hourlyData,
     isLoading: isHourlyLoading,
     isFetching: isHourlyFetching,
     isError: isHourlyError,
-  } = useHourlyForecastQuery()
+  } = forecastQuery
 
   const handleRefreshLocation = async () => {
     // 위치 정보 재요청 (nx, ny 값 갱신)
     requestLocation()
 
     // 캐시 무효화로 백그라운드 재호출 유도
-    await queryClient.invalidateQueries({ queryKey: ['currentWeather'] })
-    await queryClient.invalidateQueries({ queryKey: ['hourlyForecast'] })
+    if (grid) {
+      await queryClient.invalidateQueries({
+        queryKey: weatherQueryKeys.current(grid.nx, grid.ny),
+      })
+      await queryClient.invalidateQueries({
+        queryKey: weatherQueryKeys.hourly(grid.nx, grid.ny),
+      })
+    }
   }
 
   // Loading skeleton UI (초기 진입 로딩 시에만 표시)
@@ -66,6 +69,28 @@ export function CurrentWeatherCard({
   const locationName = grid
     ? getAddressByNxNy(grid.nx, grid.ny) || '알 수 없는 위치'
     : '알 수 없는 위치'
+
+  // 현재 위치에 대한 즐겨찾기 여부 확인
+  const bookmarkId = grid ? `${grid.nx}-${grid.ny}` : ''
+  const isBookmarked = bookmarks.some((b) => b.id === bookmarkId)
+  const isBookmarkFull = bookmarks.length >= 6
+
+  const handleToggleFavorite = () => {
+    if (!grid) return
+
+    if (isBookmarked) {
+      removeBookmark(bookmarkId)
+    } else {
+      if (bookmarks.length >= 6) return
+      addBookmark({
+        id: bookmarkId,
+        name: locationName,
+        nickname: locationName,
+        nx: grid.nx,
+        ny: grid.ny,
+      })
+    }
+  }
 
   // 현재 시간과 가장 가까운 단기예보 데이터 찾기
   const nowHourStr = String(new Date().getHours()).padStart(2, '0') + '00'
@@ -91,9 +116,9 @@ export function CurrentWeatherCard({
         <LocationHeader
           location={locationName}
           currentDate={currentDate}
-          isBookmark={isBookmark}
-          isFull={isFull}
-          onToggleFavorite={onToggleFavorite}
+          isBookmark={isBookmarked}
+          isFull={isBookmarkFull}
+          onToggleFavorite={handleToggleFavorite}
           onRefreshLocation={handleRefreshLocation}
           isRefreshing={
             isLocationLoading || isCurrentFetching || isHourlyFetching

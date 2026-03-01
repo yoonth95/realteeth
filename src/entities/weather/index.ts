@@ -6,3 +6,4 @@ export type {
   GeoLocation,
   BookmarkLocation,
 } from './model/types'
+export * from './api/queries'

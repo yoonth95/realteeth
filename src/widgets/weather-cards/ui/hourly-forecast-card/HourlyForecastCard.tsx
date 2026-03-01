@@ -9,11 +9,10 @@ import {
 } from '@/shared/ui/card'
 import { useIsMobile } from '@/shared/hooks/use-is-mobile'
 
-import { getKmaWeatherIcon } from '@/entities/weather/lib/kma-weather-mapper'
 import { HourlyChart, type HourlyChartDataItem } from './HourlyChart'
 import { ScrollNavButtons } from './ScrollNavButtons'
-import { useWeatherQueries } from '@/entities/weather'
 import { HourlyWeatherSkeleton, ErrorStateCard } from '../WeatherSkeleton'
+import { getKmaWeatherIcon, useWeatherQueries } from '@/entities/weather'
 import type { Bookmark } from '@/entities/bookmark'
 import { useWeatherLocation } from '@/widgets/weather-cards/lib/useWeatherLocation'
 
@@ -30,7 +29,6 @@ export function HourlyForecastCard({ bookmark }: { bookmark?: Bookmark }) {
   if (isLoading) return <HourlyWeatherSkeleton />
   if (isError || !data) return <ErrorStateCard />
 
-  // Map API hourly data to Chart data source
   const chartData: HourlyChartDataItem[] = data.hourlyData.map((d) => {
     // d.time: "1500"
     const hour = parseInt(d.time.substring(0, 2), 10)

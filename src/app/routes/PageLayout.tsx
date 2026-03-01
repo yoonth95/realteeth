@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Header } from '@/widgets/header/ui/Header'
+import { Header } from '@/widgets/header'
 
 export function PageLayout({ children }: { children: ReactNode }) {
   return (

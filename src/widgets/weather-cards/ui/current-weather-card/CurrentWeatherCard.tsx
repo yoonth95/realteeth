@@ -2,9 +2,12 @@ import { Card, CardContent } from '@/shared/ui/card'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { CurrentWeatherSkeleton, ErrorStateCard } from '../WeatherSkeleton'
-import { getAddressByNxNy } from '@/entities/weather/lib/address-utils'
-import { getKmaWeatherIcon } from '@/entities/weather/lib/kma-weather-mapper'
-import { useWeatherQueries, weatherQueryKeys } from '@/entities/weather'
+import {
+  getAddressByNxNy,
+  getKmaWeatherIcon,
+  useWeatherQueries,
+  weatherQueryKeys,
+} from '@/entities/weather'
 
 import { LocationHeader } from './LocationHeader'
 import { WeatherDisplay } from './WeatherDisplay'

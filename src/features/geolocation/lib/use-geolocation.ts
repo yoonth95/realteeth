@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { latLonToGrid } from '@/shared/lib/weather-grid-converter'
-import { useLocationStore } from '@/entities/location/model/store'
+import { useLocationStore } from '@/entities/location'
 
 export function useGeolocation() {
   const store = useLocationStore()

@@ -1,5 +1,4 @@
-import { WeatherIcon } from '@/entities/weather'
-import { getKmaWeatherIcon } from '@/entities/weather/lib/kma-weather-mapper'
+import { WeatherIcon, getKmaWeatherIcon } from '@/entities/weather'
 
 interface WeatherData {
   current: {

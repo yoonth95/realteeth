@@ -2,14 +2,32 @@ import { Link } from 'react-router-dom'
 import { Card, CardContent } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { Pencil, Trash2 } from 'lucide-react'
-import type { BookmarkLocation } from '@/entities/weather'
+import type { Bookmark } from '@/entities/bookmark'
+import { useBookmarkStore } from '@/entities/bookmark'
 import { BookmarkCardWeatherData } from './BookmarkCardWeatherData'
+import { useCombinedWeatherQuery } from '@/entities/weather'
+import { BookmarkCardSkeleton } from './BookmarkSkeleton'
 
-export function BookmarkCard({ bookmark }: { bookmark: BookmarkLocation }) {
+export function BookmarkCard({ bookmark }: { bookmark: Bookmark }) {
+  const { removeBookmark } = useBookmarkStore()
+  const { data, isLoading, isError } = useCombinedWeatherQuery(
+    bookmark.nx,
+    bookmark.ny,
+  )
+
+  if (isLoading || !data) {
+    return <BookmarkCardSkeleton />
+  }
+
+  // 에러 발생 시 처리 (예: 스켈레톤 유지 또는 에러 메시지)
+  if (isError) {
+    return null // 임시로 숨김
+  }
+
   return (
     <Link
       key={bookmark.id}
-      to={`/detail?lat=${bookmark.lat}&lon=${bookmark.lon}&name=${encodeURIComponent(bookmark.nickname)}`}
+      to={`/detail?nx=${bookmark.nx}&ny=${bookmark.ny}&name=${encodeURIComponent(bookmark.nickname)}`}
       className="group block"
     >
       <Card className="bg-card h-full cursor-pointer border-0 p-0 shadow-md transition-all duration-200 group-hover:-translate-y-0.5 hover:shadow-lg">
@@ -33,10 +51,7 @@ export function BookmarkCard({ bookmark }: { bookmark: BookmarkLocation }) {
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7"
-                // onClick={(e) => {
-                //   e.preventDefault()
-                //   handleEditStart(bookmark)
-                // }}
+                // 이름 수정은 추후 연동 (예: handleEditStart 로직 호출)
                 aria-label="이름 수정"
               >
                 <Pencil className="text-muted-foreground h-3 w-3" />
@@ -45,17 +60,17 @@ export function BookmarkCard({ bookmark }: { bookmark: BookmarkLocation }) {
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7"
-                // onClick={(e) => {
-                //   e.preventDefault()
-                //   setDeleteConfirmId(bookmark.id)
-                // }}
+                onClick={(e) => {
+                  e.preventDefault()
+                  removeBookmark(bookmark.id)
+                }}
                 aria-label="즐겨찾기 삭제"
               >
                 <Trash2 className="text-muted-foreground h-3 w-3" />
               </Button>
             </div>
           </div>
-          <BookmarkCardWeatherData bookmark={bookmark} />
+          <BookmarkCardWeatherData data={data} />
         </CardContent>
       </Card>
     </Link>

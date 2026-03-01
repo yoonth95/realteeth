@@ -4,7 +4,7 @@ import { BookmarkSection } from '@/widgets/bookmark-cards'
 import { useGeolocation, GeolocationBanners } from '@/features/geolocation'
 
 export function HomePage() {
-  const { requestLocation, grid, error, isLoading, isResolved, prompted } =
+  const { requestLocation, error, isLoading, isResolved, prompted } =
     useGeolocation()
   const [successTimerFinished, setSuccessTimerFinished] = useState(false)
 
@@ -25,8 +25,6 @@ export function HomePage() {
   const showSuccessBanner = Boolean(
     isResolved && !error && prompted && !successTimerFinished,
   )
-
-  console.log(grid)
 
   return (
     <div className="flex flex-col gap-6">

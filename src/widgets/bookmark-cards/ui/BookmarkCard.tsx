@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Card, CardContent } from '@/shared/ui/card'
-import { EditDialog } from '@/shared/components/edit-dialog'
 import { Button } from '@/shared/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ui/tooltip'
+import { EditDialog } from '@/shared/components/edit-dialog'
 import { type Bookmark, useBookmarkStore } from '@/entities/bookmark'
 import { useCombinedWeatherQuery } from '@/entities/weather'
 import { BookmarkCardWeatherData } from './BookmarkCardWeatherData'
@@ -55,30 +56,44 @@ export function BookmarkCard({ bookmark }: { bookmark: Bookmark }) {
                 className="flex shrink-0 items-center gap-0.5"
                 onClick={(e) => e.preventDefault()}
               >
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    setShowEditDialog(true)
-                  }}
-                  aria-label="이름 수정"
-                >
-                  <Pencil className="text-muted-foreground h-3 w-3" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    removeBookmark(bookmark.id)
-                  }}
-                  aria-label="즐겨찾기 삭제"
-                >
-                  <Trash2 className="text-muted-foreground h-3 w-3" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        setShowEditDialog(true)
+                      }}
+                      aria-label="장소 별칭 수정"
+                    >
+                      <Pencil className="text-muted-foreground h-3 w-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>장소 별칭 수정</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        removeBookmark(bookmark.id)
+                      }}
+                      aria-label="즐겨찾기 삭제"
+                    >
+                      <Trash2 className="text-muted-foreground h-3 w-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>즐겨찾기 삭제</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </div>
             <BookmarkCardWeatherData data={data} />

@@ -9,7 +9,10 @@ import {
   CloudSun,
 } from 'lucide-react'
 
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+const iconMap: Record<
+  string,
+  React.ComponentType<{ className?: string; color?: string }>
+> = {
   sun: Sun,
   cloud: Cloud,
   'cloud-sun': CloudSun,
@@ -20,6 +23,17 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   'cloud-fog': CloudFog,
 }
 
+const colorMap: Record<string, string> = {
+  sun: 'text-weather-sun',
+  cloud: 'text-weather-cloud',
+  'cloud-sun': 'text-weather-sun',
+  'cloud-rain': 'text-weather-rain',
+  'cloud-snow': 'text-weather-snow',
+  'cloud-lightning': 'text-weather-lightning',
+  'cloud-drizzle': 'text-weather-drizzle',
+  'cloud-fog': 'text-weather-fog',
+}
+
 interface WeatherIconProps {
   icon: string
   className?: string
@@ -27,5 +41,6 @@ interface WeatherIconProps {
 
 export function WeatherIcon({ icon, className = 'h-6 w-6' }: WeatherIconProps) {
   const Icon = iconMap[icon] || Cloud
-  return <Icon className={className} />
+  const colorClass = colorMap[icon] || 'text-weather-cloud'
+  return <Icon className={`${className} ${colorClass}`} />
 }

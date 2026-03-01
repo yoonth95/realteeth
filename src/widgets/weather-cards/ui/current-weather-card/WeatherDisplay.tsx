@@ -24,7 +24,7 @@ export function WeatherDisplay({
         </span>
       </div>
       <div className="bg-secondary/50 flex h-20 w-20 items-center justify-center rounded-2xl">
-        <WeatherIcon icon={icon} className="text-primary h-12 w-12" />
+        <WeatherIcon icon={icon} className="h-12 w-12" />
       </div>
     </div>
   )

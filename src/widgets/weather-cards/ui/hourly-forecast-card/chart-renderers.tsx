@@ -20,13 +20,13 @@ export const ChartTopTick = ({
   const renderIcon = () => {
     switch (itemData.condition) {
       case 'sun':
-        return <Sun size={18} color="#eab308" />
+        return <Sun size={18} className="text-weather-sun" />
       case 'moon':
-        return <Moon size={18} color="#94a3b8" />
+        return <Moon size={18} className="text-weather-moon" />
       case 'rain':
-        return <CloudRain size={18} color="#3b82f6" />
+        return <CloudRain size={18} className="text-weather-rain" />
       default:
-        return <Cloud size={18} color="#cbd5e1" />
+        return <Cloud size={18} className="text-weather-cloud" />
     }
   }
 
@@ -88,7 +88,9 @@ export const ChartBottomTick = ({
 export const ChartDot = ({ cx, cy, payload }: ChartDotProps) => {
   if (!payload) return null
 
-  const dotColor = payload.isDay ? '#eab308' : '#3b82f6'
+  const dotColor = payload.isDay
+    ? 'var(--color-weather-sun)'
+    : 'var(--color-weather-rain)'
   return (
     <circle
       cx={cx}

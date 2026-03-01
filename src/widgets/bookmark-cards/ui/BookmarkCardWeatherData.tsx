@@ -51,7 +51,7 @@ export function BookmarkCardWeatherData({ data }: Props) {
         </span>
       </div>
       <div className="bg-secondary/70 flex h-10 w-10 items-center justify-center rounded-xl">
-        <WeatherIcon icon={icon} className="text-primary h-6 w-6" />
+        <WeatherIcon icon={icon} className="h-6 w-6" />
       </div>
     </div>
   )

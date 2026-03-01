@@ -35,7 +35,9 @@ export const HourlyChart = memo(function HourlyChart({
             <linearGradient id="lineColorGradient" x1="0" y1="0" x2="1" y2="0">
               {data.map((d, index) => {
                 const offset = `${(index / (data.length - 1)) * 100}%`
-                const stopColor = d.isDay ? '#eab308' : '#3b82f6'
+                const stopColor = d.isDay
+                  ? 'var(--color-weather-sun)'
+                  : 'var(--color-weather-rain)'
                 return (
                   <stop key={index} offset={offset} stopColor={stopColor} />
                 )

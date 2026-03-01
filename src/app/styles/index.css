@@ -41,6 +41,15 @@
   --highlight-red: #ef4444;
   --highlight-blue: #3b82f6;
   --highlight-yellow: #eab308;
+
+  --weather-sun: #eab308;
+  --weather-cloud: #cbd5e1;
+  --weather-rain: #3b82f6;
+  --weather-snow: #bae6fd;
+  --weather-lightning: #fbbf24;
+  --weather-drizzle: #60a5fa;
+  --weather-fog: #94a3b8;
+  --weather-moon: #94a3b8;
 }
 
 .dark {
@@ -121,6 +130,15 @@
   --color-highlight-red: var(--highlight-red);
   --color-highlight-blue: var(--highlight-blue);
   --color-highlight-yellow: var(--highlight-yellow);
+
+  --color-weather-sun: var(--weather-sun);
+  --color-weather-cloud: var(--weather-cloud);
+  --color-weather-rain: var(--weather-rain);
+  --color-weather-snow: var(--weather-snow);
+  --color-weather-lightning: var(--weather-lightning);
+  --color-weather-drizzle: var(--weather-drizzle);
+  --color-weather-fog: var(--weather-fog);
+  --color-weather-moon: var(--weather-moon);
 }
 
 @theme {

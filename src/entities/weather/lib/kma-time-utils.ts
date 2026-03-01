@@ -74,3 +74,33 @@ export function getVilageFcstBaseTime(date: Date = new Date()) {
     baseTime,
   }
 }
+
+export function getMinMaxBaseTime(date: Date = new Date()) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = date.getHours()
+  const minutes = date.getMinutes()
+
+  // 02:10 을 기준으로 계산
+  const timeNum = hours * 100 + minutes
+
+  if (timeNum < 210) {
+    // 02:10 이전에는 당일 02:00 데이터가 없으므로, 전날 23:00 발표 데이터를 사용
+    const prevDate = new Date(date)
+    prevDate.setDate(prevDate.getDate() - 1)
+    const pYear = prevDate.getFullYear()
+    const pMonth = String(prevDate.getMonth() + 1).padStart(2, '0')
+    const pDay = String(prevDate.getDate()).padStart(2, '0')
+    return {
+      baseDate: `${pYear}${pMonth}${pDay}`,
+      baseTime: '2300',
+    }
+  }
+
+  // 02:10 이후에는 당일 02:00 발표 데이터를 사용하면 당일 최저/최고 기온을 정확히 얻음
+  return {
+    baseDate: `${year}${month}${day}`,
+    baseTime: '0200',
+  }
+}

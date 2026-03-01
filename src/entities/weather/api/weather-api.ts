@@ -7,6 +7,7 @@ import {
 import {
   getUltraSrtNcstBaseTime,
   getVilageFcstBaseTime,
+  getMinMaxBaseTime,
 } from '../lib/kma-time-utils'
 
 const API_KEY = import.meta.env.VITE_KMA_API_KEY
@@ -56,32 +57,55 @@ export async function getUltraSrtNcst(nx: number, ny: number) {
 
 // 2. 단기예보 (최고/최저 기온, 시간대별 예보)
 export async function getVilageFcst(nx: number, ny: number) {
-  const { baseDate, baseTime } = getVilageFcstBaseTime()
-  const url = new URL(
-    'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst',
-  )
-  url.searchParams.append('ServiceKey', API_KEY)
-  url.searchParams.append('pageNo', '1')
-  url.searchParams.append('numOfRows', '1000')
-  url.searchParams.append('dataType', 'JSON')
-  url.searchParams.append('base_date', baseDate)
-  url.searchParams.append('base_time', baseTime)
-  url.searchParams.append('nx', nx.toString())
-  url.searchParams.append('ny', ny.toString())
+  const { baseDate: currentBaseDate, baseTime: currentBaseTime } =
+    getVilageFcstBaseTime()
+  const { baseDate: minMaxBaseDate, baseTime: minMaxBaseTime } =
+    getMinMaxBaseTime()
 
-  const response = await fetch(url.toString())
-  if (!response.ok) {
-    throw new Error(`Failed to fetch VilageFcst: ${response.status}`)
+  const fetchFcst = async (
+    bDate: string,
+    bTime: string,
+    numOfRows: string = '1000',
+  ) => {
+    const url = new URL(
+      'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst',
+    )
+    url.searchParams.append('ServiceKey', API_KEY)
+    url.searchParams.append('pageNo', '1')
+    url.searchParams.append('numOfRows', numOfRows)
+    url.searchParams.append('dataType', 'JSON')
+    url.searchParams.append('base_date', bDate)
+    url.searchParams.append('base_time', bTime)
+    url.searchParams.append('nx', nx.toString())
+    url.searchParams.append('ny', ny.toString())
+
+    const response = await fetch(url.toString())
+    if (!response.ok) {
+      throw new Error(`Failed to fetch VilageFcst: ${response.status}`)
+    }
+
+    const json = await response.json()
+    const parsed = vilageFcstResponseSchema.parse(json)
+
+    if (parsed.response.header.resultCode !== '00') {
+      throw new Error(`API Error: ${parsed.response.header.resultMsg}`)
+    }
+
+    return parsed.response.body?.items.item || []
   }
 
-  const json = await response.json()
-  const parsed = vilageFcstResponseSchema.parse(json)
+  // 최신 예보와 최고/최저 기온 예보가 같은 시간대면 한 번만 호출, 다르면 병렬 호출
+  const isSameBase =
+    currentBaseDate === minMaxBaseDate && currentBaseTime === minMaxBaseTime
 
-  if (parsed.response.header.resultCode !== '00') {
-    throw new Error(`API Error: ${parsed.response.header.resultMsg}`)
-  }
+  const [items, minMaxItems] = await Promise.all([
+    fetchFcst(currentBaseDate, currentBaseTime, '1000'),
+    isSameBase
+      ? Promise.resolve([])
+      : fetchFcst(minMaxBaseDate, minMaxBaseTime, '300'),
+  ])
 
-  const items = parsed.response.body?.items.item || []
+  const targetMinMaxItems = isSameBase ? items : minMaxItems
 
   // 오늘 날짜 찾기
   const today = new Date()
@@ -91,10 +115,10 @@ export async function getVilageFcst(nx: number, ny: number) {
   const todayStr = `${tYear}${tMonth}${tDay}`
 
   // 일 최저/최고 기온 (TMN, TMX)
-  const minTempItem = items.find(
+  const minTempItem = targetMinMaxItems.find(
     (i) => i.category === 'TMN' && i.fcstDate === todayStr,
   )
-  const maxTempItem = items.find(
+  const maxTempItem = targetMinMaxItems.find(
     (i) => i.category === 'TMX' && i.fcstDate === todayStr,
   )
 
@@ -166,7 +190,7 @@ function processHourlyForecast(items: VilageFcstItem[]) {
   // 앞서 정의한 시간순으로 정렬
   const sortedKeys = Array.from(hourlyMap.keys()).sort()
 
-  // 현재 시간 이후 24개만 추출
+  // 현재 시간 이후 25개 추출 (24시간)
   const targetYear = now.getFullYear()
   const targetMonth = String(now.getMonth() + 1).padStart(2, '0')
   const targetDay = String(now.getDate()).padStart(2, '0')
@@ -178,8 +202,8 @@ function processHourlyForecast(items: VilageFcstItem[]) {
   )
   const resultKeys =
     startIndex !== -1
-      ? sortedKeys.slice(startIndex, startIndex + 24)
-      : sortedKeys.slice(0, 24)
+      ? sortedKeys.slice(startIndex, startIndex + 25)
+      : sortedKeys.slice(0, 25)
 
   return resultKeys.map((k) => hourlyMap.get(k) as HourlyForecastData)
 }

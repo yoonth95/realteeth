@@ -12,7 +12,8 @@ import { useIsMobile } from '@/shared/hooks/use-is-mobile'
 import { getKmaWeatherIcon } from '@/entities/weather/lib/kma-weather-mapper'
 import { HourlyChart, type HourlyChartDataItem } from './HourlyChart'
 import { ScrollNavButtons } from './ScrollNavButtons'
-import { useHourlyForecastQuery } from '@/widgets/weather-cards/api/queries'
+import { useWeatherQueries } from '@/entities/weather'
+import { useLocationStore } from '@/entities/location/model/store'
 import { HourlyWeatherSkeleton, ErrorStateCard } from '../WeatherSkeleton'
 
 export function HourlyForecastCard() {
@@ -21,7 +22,9 @@ export function HourlyForecastCard() {
   const endSentinelRef = useRef<HTMLDivElement>(null)
 
   const { isMobile } = useIsMobile()
-  const { data, isLoading, isError } = useHourlyForecastQuery()
+  const { grid } = useLocationStore()
+  const { forecastQuery } = useWeatherQueries(grid?.nx, grid?.ny)
+  const { data, isLoading, isError } = forecastQuery
 
   if (isLoading) return <HourlyWeatherSkeleton />
   if (isError || !data) return <ErrorStateCard />

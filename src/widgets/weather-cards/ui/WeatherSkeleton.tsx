@@ -68,11 +68,11 @@ export function WeatherSkeleton() {
   )
 }
 
-export function ErrorStateCard() {
+export function ErrorStateCard({ message }: { message?: string }) {
   return (
     <Card className="bg-card mt-6 flex h-[280px] w-full items-center justify-center border-0 shadow-lg">
       <div className="text-muted-foreground text-sm font-medium">
-        해당 장소의 정보가 제공되지 않습니다.
+        {message || '해당 장소의 정보가 제공되지 않습니다.'}
       </div>
     </Card>
   )

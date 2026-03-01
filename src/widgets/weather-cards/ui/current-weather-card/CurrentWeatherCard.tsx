@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/shared/ui/card'
 import { useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import { CurrentWeatherSkeleton, ErrorStateCard } from '../WeatherSkeleton'
-import { useGeolocation } from '@/features/geolocation'
 import { getAddressByNxNy } from '@/entities/weather/lib/address-utils'
 import { getKmaWeatherIcon } from '@/entities/weather/lib/kma-weather-mapper'
 import { useWeatherQueries, weatherQueryKeys } from '@/entities/weather'
@@ -10,18 +10,19 @@ import { LocationHeader } from './LocationHeader'
 import { WeatherDisplay } from './WeatherDisplay'
 import { WeatherDetailStats } from './WeatherDetailStats'
 import { useBookmarkStore, type Bookmark } from '@/entities/bookmark'
+import { useWeatherLocation } from '@/widgets/weather-cards/lib/useWeatherLocation'
 
 export function CurrentWeatherCard({ bookmark }: { bookmark?: Bookmark }) {
   const {
-    grid: locationGrid,
+    grid,
+    locationName: hookLocationName,
     requestLocation,
-    isLoading: isLocationLoading,
-  } = useGeolocation()
+    isLocationLoading,
+  } = useWeatherLocation(bookmark)
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
 
   const { bookmarks, addBookmark, removeBookmark } = useBookmarkStore()
-
-  const grid = bookmark ? { nx: bookmark.nx, ny: bookmark.ny } : locationGrid
 
   const { currentQuery, forecastQuery } = useWeatherQueries(grid?.nx, grid?.ny)
 
@@ -41,6 +42,9 @@ export function CurrentWeatherCard({ bookmark }: { bookmark?: Bookmark }) {
 
   const handleRefreshLocation = async () => {
     if (bookmark) return
+
+    // 쿼리스트링 초기화
+    navigate('/')
     // 위치 정보 재요청 (nx, ny 값 갱신)
     requestLocation()
 
@@ -69,11 +73,13 @@ export function CurrentWeatherCard({ bookmark }: { bookmark?: Bookmark }) {
     weekday: 'short',
   }).format(new Date())
 
-  const locationName = bookmark
-    ? bookmark.name
-    : grid
-      ? getAddressByNxNy(grid.nx, grid.ny) || '알 수 없는 위치'
-      : '알 수 없는 위치'
+  const locationName = hookLocationName
+    ? hookLocationName
+    : bookmark
+      ? bookmark.name
+      : grid
+        ? getAddressByNxNy(grid.nx, grid.ny) || '알 수 없는 위치'
+        : '알 수 없는 위치'
 
   const aliasName = bookmark ? bookmark.nickname : undefined
 

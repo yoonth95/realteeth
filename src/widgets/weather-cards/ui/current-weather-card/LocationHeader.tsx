@@ -10,6 +10,8 @@ export function LocationHeader({
   isBookmark,
   isFull,
   onToggleFavorite,
+  onRefreshLocation,
+  isRefreshing,
 }: LocationHeaderProps) {
   return (
     <CardHeader className="pb-2">
@@ -17,8 +19,17 @@ export function LocationHeader({
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center gap-1">
             <span className="font-bold">{location}</span>
-            <Button variant="ghost" size="icon" className="h-5 w-5">
-              <Crosshair className="h-3.5 w-3.5" />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-5 w-5"
+              onClick={onRefreshLocation}
+              disabled={isRefreshing}
+              aria-label="현재 위치 및 날씨 새로고침"
+            >
+              <Crosshair
+                className={`h-3.5 w-3.5 ${isRefreshing ? 'text-muted-foreground animate-spin' : ''}`}
+              />
             </Button>
           </div>
           <span className="text-muted-foreground text-xs font-medium">

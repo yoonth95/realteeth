@@ -13,6 +13,8 @@ export interface LocationHeaderProps {
   isBookmark?: boolean
   isFull?: boolean
   onToggleFavorite?: () => void
+  onRefreshLocation?: () => void
+  isRefreshing?: boolean
 }
 
 export interface WeatherDisplayProps {
